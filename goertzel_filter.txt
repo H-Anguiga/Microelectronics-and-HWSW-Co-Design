@@ -1,0 +1,77 @@
+ library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity goertzel_filter is
+    port (
+        clk      : in  std_logic;                   -- System clock (4 MHz)
+        rst      : in  std_logic;                   -- Synchronous reset
+        start    : in  std_logic;                   -- Start signal for processing a data set
+        data_in  : in  std_logic_vector(11 downto 0);  -- 12-bit unsigned input data
+        valid    : in  std_logic;                   -- Input data valid signal
+        result   : out std_logic_vector(19 downto 0);  -- 20-bit signed output result
+        done     : out std_logic                    -- Done signal for end of processing
+    );
+end goertzel_filter;
+
+architecture behavioral of goertzel_filter is
+
+    constant N : integer := 135;
+    constant F_sample : integer := 4000000;    -- 4 MHz
+    constant F_target : integer := 150000;     -- 150 kHz
+    constant k : integer := integer(real(N) * real(F_target) / real(F_sample));
+
+    -- Pre-calculated values for cos(omega) and sin(omega)
+    constant cos_omega : signed(19 downto 0) := to_signed(524288, 20); -- cos(omega) * 2^19, assuming omega = 0.471238898 (precalculated)
+    constant sin_omega : signed(19 downto 0) := to_signed(0, 20);      -- sin(omega) * 2^19, assuming omega = 0.471238898 (precalculated)
+    constant coeff : signed(19 downto 0) := cos_omega;
+
+    signal sample_count : integer range 0 to N-1;
+    signal Q0, Q1, Q2 : signed(19 downto 0);
+    signal input_signed : signed(19 downto 0);
+    signal result_internal : signed(39 downto 0);
+
+begin
+
+    process(clk)
+    begin
+        if rising_edge(clk) then
+            if rst = '1' then
+                sample_count <= 0;
+                Q0 <= (others => '0');
+                Q1 <= (others => '0');
+                Q2 <= (others => '0');
+                result_internal <= (others => '0');
+                done <= '0';
+            elsif start = '1' then
+                if valid = '1' then
+                    -- Convert input to signed with offset removal
+                    input_signed <= signed(data_in) - to_signed(2048, 20);  -- Offset binary to 2's complement (2048 = 2^11)
+
+                    -- Goertzel algorithm
+                    Q0 <= input_signed + (coeff * Q1) - Q2;
+                    Q2 <= Q1;
+                    Q1 <= Q0;
+
+                    if sample_count = N-1 then
+                        -- Final calculation of the magnitude
+                        result_internal <= Q1 * Q1 + Q2 * Q2 - (coeff * Q1 * Q2) / (2**19);
+                        result <= std_logic_vector(result_internal(39 downto 20));  -- Scaling result to 20 bits
+                        done <= '1';
+                    else
+                        sample_count <= sample_count + 1;
+                        done <= '0';
+                    end if;
+                end if;
+            else
+                sample_count <= 0;
+                Q0 <= (others => '0');
+                Q1 <= (others => '0');
+                Q2 <= (others => '0');
+                result_internal <= (others => '0');
+                done <= '0';
+            end if;
+        end if;
+    end process;
+
+end behavioral;
