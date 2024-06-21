@@ -1,0 +1,97 @@
+<!DOCTYPE HTML>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Fixed-Point Report for goertzel_filter</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<style>
+	body { font-family: monospace; }
+	h2 { font-family: Arial, Helvetica, sans-serif; color: #990000; margin-top: 50px; }
+	table,th,td { border: 1px solid black; }
+	table { margin-top: 30px; }
+	th { align: center; font-weight: bold; }
+	tr.h { background-color: #99CCFF; }
+	tr.a { background-color: #EEEEFF; }
+	tr.b { background-color: #FFFFFF; }
+	tr.c { background-color: #FFA500; }
+	tr.a td, tr.b td { border-style: none; }
+	td.left { text-align: left; }
+	td.right { text-align: right; }
+	td.center { text-align: center; }
+	td.bold { font-weight: bold; }
+	pre { padding: 0px; margin: 0px; }
+	span { font-style: italic; }
+	.code, .code tr, .code th, .code td { border: none; border-collapse: collapse; }
+	.padd { padding-left: 5px; }
+	td.cov, th.cov { width: 50px; height: 20px; text-align: center; font-weight: bold; border-right: 2px solid black; cell-spacing: 0px; }
+	td.cov { vertical-align: top; }
+	td.black { color: #000000; font-weight: bold; padding-top: 4px; }
+	td.white { color: #FFFFFF; font-weight: bold; padding-top: 4px; }
+	.code th { font-weight: bold; border-bottom: 2px solid black; }
+</style>
+</head>
+<body>
+<h3>Generated on  2024-06-20 21:13:48</h3>
+<p>The following table shows fixed point instrumentation results</p>
+<h2>Fixed-Point Report <span>goertzel_filter<span></h2>
+<TABLE class="code">
+<TR>
+<TH class="cov padd">Simulation Coverage</TH>
+<TH>Code</TH>
+</TR>
+<TR>
+<TD class="cov white" style="background-color: rgb(5,112,9);">100%</TD>
+<TD class="padd"><pre>function output = goertzel_filter(input_signal, N, target_freq, sample_freq)
+    omega = 2 * pi * target_freq / sample_freq;
+    coeff = 2 * cos(omega);
+    s_prev = 0;
+    s_prev2 = 0;
+    for n = 1:N
+        s = double(input_signal(n)) + coeff * s_prev - s_prev2;
+        s_prev2 = s_prev;
+        s_prev = s;
+    end
+    real_part = s_prev - s_prev2 * cos(omega);
+    imag_part = s_prev2 * sin(omega);
+    power = real_part^2 + imag_part^2;
+    
+    % Scale the power to match the expected results format
+    max_expected_value = 65535; % Assuming 16-bit unsigned expected results
+    output = power / (2^(20 * 2)); % Adjust scaling factor as needed
+    output = round(output * max_expected_value); % Scale to 16-bit range
+end</pre></TD>
+</TR>
+</TABLE>
+<TABLE><TR class="h"><th>Variable Name</th><th>Type</th><th>Sim Min</th><th>Sim Max</th><th>Static Min</th><th>Static Max</th><th>Whole Number</th><th>ProposedType <BR /> (Best For WL = 14)</th></TR><TR class="a">
+<TD class="left">N</TD><TD class="left">double</TD><TD class="right">135</TD><TD class="right">135</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">Yes</TD><TD class="left">numerictype(0, 8, 0)</TD></TR>
+<TR class="b">
+<TD class="left">coeff</TD><TD class="left">double</TD><TD class="right">1.9447398407953531</TD><TD class="right">1.9447398407953531</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(0, 14, 13)</TD></TR>
+<TR class="c">
+<TD class="left">imag_part</TD><TD class="left">double</TD><TD class="right">-2769365.6001726524</TD><TD class="right">1969157.463182648</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(1, 14, -9)</TD></TR>
+<TR class="b">
+<TD class="left">input_signal</TD><TD class="left">double 1 x 135 </TD><TD class="right">-32767</TD><TD class="right">32767</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">Yes</TD><TD class="left">numerictype(1, 16, 0)</TD></TR>
+<TR class="a">
+<TD class="left">max_expected_value</TD><TD class="left">double</TD><TD class="right">65535</TD><TD class="right">65535</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">Yes</TD><TD class="left">numerictype(0, 16, 0)</TD></TR>
+<TR class="b">
+<TD class="left">n</TD><TD class="left">double</TD><TD class="right">1</TD><TD class="right">135</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">Yes</TD><TD class="left">numerictype(0, 8, 0)</TD></TR>
+<TR class="a">
+<TD class="left">omega</TD><TD class="left">double</TD><TD class="right">0.23561944901923448</TD><TD class="right">0.23561944901923448</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(0, 14, 16)</TD></TR>
+<TR class="c">
+<TD class="left">output</TD><TD class="left">double</TD><TD class="right">2.8251117128945378</TD><TD class="right">479608</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(0, 14, -5)</TD></TR>
+<TR class="c">
+<TD class="left">power</TD><TD class="left">double</TD><TD class="right">3106243178093.717</TD><TD class="right">8046609494001.278</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(0, 14, -29)</TD></TR>
+<TR class="c">
+<TD class="left">real_part</TD><TD class="left">double</TD><TD class="right">-1807474.2998704081</TD><TD class="right">2824427.968011371</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(1, 14, -9)</TD></TR>
+<TR class="c">
+<TD class="left">s</TD><TD class="left">double</TD><TD class="right">-11906996.91249293</TD><TD class="right">10717400.761467643</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(1, 14, -11)</TD></TR>
+<TR class="c">
+<TD class="left">s_prev</TD><TD class="left">double</TD><TD class="right">-11906996.91249293</TD><TD class="right">10717400.761467643</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(1, 14, -11)</TD></TR>
+<TR class="c">
+<TD class="left">s_prev2</TD><TD class="left">double</TD><TD class="right">-11906996.91249293</TD><TD class="right">10717400.761467643</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">No</TD><TD class="left">numerictype(1, 14, -11)</TD></TR>
+<TR class="b">
+<TD class="left">sample_freq</TD><TD class="left">double</TD><TD class="right">4000000</TD><TD class="right">4000000</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">Yes</TD><TD class="left">numerictype(0, 22, 0)</TD></TR>
+<TR class="a">
+<TD class="left">target_freq</TD><TD class="left">double</TD><TD class="right">150000</TD><TD class="right">150000</TD><TD class="right"></TD><TD class="right"></TD><TD class="left">Yes</TD><TD class="left">numerictype(0, 18, 0)</TD></TR>
+</TABLE>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+
+Warnings: 
+
+File: C:\Users\anguiga\Desktop\GT\goertzel_filter.m, line : 7, column : 13. Function 'double' not supported for fixed-point conversion.
